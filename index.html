@@ -1,0 +1,597 @@
+<meta name="claude:viewport-fit-sides" content="cover">
+<title>pink.Live Protótipo</title>
+<link rel="preconnect" href="https://fonts.gstatic.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;700;800&family=Inter:wght@400;500;600&display=swap">
+<style>
+/* Layout: cabeçalho fixo, destaque com carrossel horizontal de lives, grade de lives,
+   páginas por hash. Visual escuro com gradiente rosa e roxo. Login é simulado. */
+:root {
+  --bg: #0f0a1a;
+  --bg-soft: #1a1228;
+  --surface: #221832;
+  --surface-2: #2a1d3d;
+  --fg: #ffffff;
+  --muted: #b9aecb;
+  --accent: #ff2d87;
+  --accent-2: #7b2ff7;
+  --accent-ink: #ffffff;
+  --line: rgba(255,255,255,.12);
+  --live: #ff2d87;
+  --display: "Outfit", "Segoe UI", system-ui, sans-serif;
+  --body: "Inter", "Segoe UI", system-ui, sans-serif;
+  --grad: linear-gradient(90deg, var(--accent), var(--accent-2));
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --bg: #fbf7fb; --bg-soft: #ffffff; --surface: #ffffff; --surface-2: #f3eaf6;
+    --fg: #1d1426; --muted: #6a5a7a; --accent-ink: #ffffff; --line: #e5d9ee; color-scheme: light;
+  }
+}
+:root[data-theme="light"] {
+  --bg: #fbf7fb; --bg-soft: #ffffff; --surface: #ffffff; --surface-2: #f3eaf6;
+  --fg: #1d1426; --muted: #6a5a7a; --accent-ink: #ffffff; --line: #e5d9ee; color-scheme: light;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: radial-gradient(1100px 560px at 50% -10%, #2a1245 0%, var(--bg) 62%) var(--bg);
+  color: var(--fg); font-family: var(--body); font-size: 15px; line-height: 1.55;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  overflow-x: hidden; min-height: 100vh;
+}
+a { color: var(--accent); }
+h1, h2, h3 { font-family: var(--display); line-height: 1.15; text-wrap: balance; margin: 0 0 .5em; }
+h1 { font-size: clamp(2rem, 6vw, 3.2rem); font-weight: 800; letter-spacing: -.02em; }
+h2 { font-size: clamp(1.4rem, 4vw, 1.9rem); font-weight: 700; }
+h3 { font-size: 1.1rem; font-weight: 700; }
+p { margin: 0 0 1em; max-width: 65ch; }
+button, input, select { font: inherit; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+.wrap { max-width: 1120px; margin: 0 auto; padding-block: 16px 48px; }
+
+.top {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5;
+  background: color-mix(in srgb, var(--bg) 85%, transparent); backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--line);
+  margin-left: calc(-1 * max(16px, env(safe-area-inset-left, 0px)));
+  margin-right: calc(-1 * max(16px, env(safe-area-inset-right, 0px)));
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.top-in { max-width: 1120px; margin: 0 auto; display: flex; align-items: center; gap: 12px; padding-block: 12px; flex-wrap: wrap; }
+.logo { display: inline-flex; align-items: center; gap: 10px; font-family: var(--display); font-weight: 800; font-size: 1.25rem; color: var(--fg); text-decoration: none; }
+.logo-mark { width: 34px; height: 34px; border-radius: 10px; background: var(--grad); display: grid; place-items: center; }
+.logo-mark svg { width: 18px; height: 18px; }
+nav { display: flex; gap: 4px; flex-wrap: wrap; margin-left: auto; align-items: center; }
+nav a { color: var(--muted); text-decoration: none; padding: 8px 12px; border-radius: 999px; font-weight: 500; }
+nav a[aria-current="page"] { color: var(--fg); background: var(--surface-2); }
+.who { display: flex; align-items: center; gap: 8px; font-size: .9rem; color: var(--muted); }
+.avatar {
+  width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; color: #fff;
+  font-family: var(--display); font-weight: 700; font-size: .8rem; flex: none;
+}
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  border: 1px solid transparent; border-radius: 999px; padding: 12px 22px; cursor: pointer;
+  background: var(--grad); color: var(--accent-ink); font-weight: 700; text-decoration: none;
+  box-shadow: 0 10px 28px rgba(255,45,135,.3); transition: transform .2s;
+}
+.btn:hover { transform: translateY(-1px); }
+.btn.ghost { background: transparent; color: var(--fg); border-color: var(--line); box-shadow: none; }
+.btn.small { padding: 7px 14px; font-size: .88rem; box-shadow: none; }
+
+.hero { padding: 32px 0 8px; display: grid; gap: 14px; text-align: center; justify-items: center; }
+.hero p { color: var(--muted); font-size: 1.02rem; }
+.hero-cta { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-top: 8px; }
+.hero-note { font-size: .82rem; color: var(--muted); }
+.badge { display: inline-flex; align-items: center; gap: 8px; font-size: .78rem; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); }
+.dot { width: 8px; height: 8px; border-radius: 50%; background: var(--live); animation: pulse 1.8s infinite; }
+@keyframes pulse { 0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--live) 60%, transparent); } 70% { box-shadow: 0 0 0 8px transparent; } 100% { box-shadow: 0 0 0 0 transparent; } }
+@media (prefers-reduced-motion: reduce) { .dot { animation: none; } }
+
+.counter { display: inline-flex; align-items: center; gap: 8px; background: var(--bg-soft); border: 1px solid var(--line); padding: 8px 16px; border-radius: 999px; font-size: .9rem; color: var(--muted); }
+.counter strong { color: var(--accent); font-family: var(--display); font-size: 1.05rem; }
+
+/* Carrossel horizontal de lives */
+.rail {
+  display: grid; grid-auto-flow: column; grid-auto-columns: minmax(200px, 240px); gap: 14px;
+  overflow-x: auto; scroll-snap-type: x mandatory; padding: 8px 2px 16px; margin: 0 -2px;
+  scrollbar-width: thin;
+}
+.rail > * { scroll-snap-align: start; }
+
+.bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin: 8px 0 16px; }
+.chips { display: flex; gap: 8px; flex-wrap: wrap; }
+.chip { border: 1px solid var(--line); background: var(--surface); color: var(--fg); border-radius: 999px; padding: 6px 14px; cursor: pointer; font-size: .9rem; }
+.chip[aria-pressed="true"] { background: var(--grad); color: var(--accent-ink); border-color: transparent; }
+
+.grid { display: grid; gap: 14px; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); }
+.card {
+  background: var(--surface); border: 1px solid var(--line); border-radius: 18px; overflow: hidden;
+  text-align: left; padding: 0; color: var(--fg); cursor: pointer; display: flex; flex-direction: column;
+  transition: transform .2s, border-color .2s;
+}
+.card:hover { transform: translateY(-2px); border-color: color-mix(in srgb, var(--accent) 50%, transparent); }
+.thumb {
+  aspect-ratio: 3 / 4; max-width: 100%; position: relative; display: grid; place-items: center;
+  font-family: var(--display); font-weight: 800; font-size: 2.6rem; color: rgba(255,255,255,.92);
+}
+.thumb::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,.1) 0%, transparent 40%, rgba(0,0,0,.75) 100%); }
+.thumb > * { position: relative; z-index: 1; }
+.thumb .live-tag {
+  position: absolute; top: 10px; left: 10px; z-index: 1; background: var(--live); color: #fff;
+  font-size: .7rem; font-weight: 700; padding: 3px 8px; border-radius: 6px; letter-spacing: .05em;
+}
+.thumb .views {
+  position: absolute; left: 10px; right: 10px; bottom: 10px; z-index: 1; color: #fff; font-size: .8rem;
+  display: flex; justify-content: space-between; align-items: end; gap: 6px;
+}
+.meta { padding: 12px 14px 14px; display: grid; gap: 2px; }
+.meta strong { font-weight: 600; }
+.meta small { color: var(--muted); }
+.empty { color: var(--muted); padding: 24px 0; }
+
+.section-title { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin: 40px 0 12px; flex-wrap: wrap; }
+.section-title a { font-size: .9rem; }
+
+.page { display: grid; gap: 16px; }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 22px; }
+.form { display: grid; gap: 14px; max-width: 460px; }
+.field { display: grid; gap: 6px; }
+.field label { font-weight: 600; font-size: .92rem; }
+.field input, .field select {
+  padding: 11px 12px; border-radius: 12px; border: 1px solid var(--line);
+  background: var(--bg); color: var(--fg); width: 100%; min-width: 0;
+}
+.notice { border-left: 3px solid var(--accent); background: var(--surface-2); padding: 12px 14px; border-radius: 12px; font-size: .92rem; color: var(--muted); }
+.notice.warn { border-left-color: var(--live); }
+.muted { color: var(--muted); }
+
+.faq { display: grid; gap: 10px; }
+.faq details { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 14px 18px; }
+.faq summary { font-weight: 600; cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.faq summary::-webkit-details-marker { display: none; }
+.faq summary::after { content: "+"; font-size: 1.2rem; color: var(--accent); }
+.faq details[open] summary::after { content: "−"; }
+.faq details p { margin: 10px 0 0; color: var(--muted); font-size: .95rem; }
+
+.steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+.steps .panel { padding: 18px; }
+.steps h3 { color: var(--accent); font-size: 1rem; }
+.steps p { color: var(--muted); font-size: .92rem; margin: 0; }
+
+dialog {
+  border: 1px solid var(--line); border-radius: 18px; background: var(--surface); color: var(--fg);
+  width: min(560px, calc(100vw - 32px)); padding: 0;
+}
+dialog::backdrop { background: rgba(10, 4, 16, .65); }
+.dlg-head { padding: 18px 20px 0; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.dlg-body { padding: 14px 20px 20px; display: grid; gap: 12px; }
+.dlg-body p { color: var(--muted); margin: 0; }
+.dlg-stage { aspect-ratio: 16 / 9; max-width: 100%; display: grid; place-items: center; color: #fff; font-family: var(--display); font-weight: 800; font-size: 3rem; }
+.dlg-foot { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; align-items: center; }
+.account {
+  display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; cursor: pointer;
+  background: var(--bg); color: var(--fg); border: 1px solid var(--line); border-radius: 14px; padding: 10px 12px;
+}
+.account small { color: var(--muted); display: block; }
+.account .avatar { width: 38px; height: 38px; }
+
+footer { margin-top: 48px; border-top: 1px solid var(--line); padding-block: 24px; color: var(--muted); font-size: .85rem; display: grid; gap: 10px; justify-items: start; }
+footer nav { margin-left: 0; }
+footer nav a { padding-left: 0; color: var(--muted); }
+
+[hidden] { display: none !important; }
+</style>
+
+<header class="top">
+  <div class="top-in">
+    <a class="logo" href="#inicio">
+      <span class="logo-mark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7L8 5Z" fill="#fff"/></svg></span>
+      pink.Live
+    </a>
+    <nav aria-label="Principal">
+      <a href="#inicio" data-route="inicio">Início</a>
+      <a href="#ao-vivo" data-route="ao-vivo">Ao vivo</a>
+      <a href="#transmitir" data-route="transmitir" data-only="streamer" hidden>Transmitir</a>
+      <a href="#sobre" data-route="sobre">Sobre</a>
+      <span class="who" data-who></span>
+      <button class="btn small" type="button" data-login-btn>Entrar com Google</button>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- Início -->
+  <section data-view="inicio" hidden>
+    <div class="hero">
+      <span class="badge"><span class="dot" aria-hidden="true"></span> Protótipo de demonstração</span>
+      <h1>Lives para quem tem 18 anos ou mais.</h1>
+      <p>Assista criadores de diferentes áreas, siga quem você gosta e acompanhe as transmissões em tempo real. Quem transmite entra com a mesma conta Google.</p>
+      <div class="hero-cta">
+        <a class="btn" href="#ao-vivo">Ver transmissões</a>
+        <button class="btn ghost" type="button" data-login-btn>Entrar com Google</button>
+      </div>
+      <span class="counter"><span class="dot" aria-hidden="true"></span> <strong>1.240</strong> pessoas assistindo agora (exemplo)</span>
+      <p class="hero-note">Login simulado: nenhuma conta real é acessada e nenhuma transmissão acontece.</p>
+    </div>
+
+    <div class="section-title"><h2 style="margin:0">Em alta</h2><a href="#ao-vivo">Ver todas</a></div>
+    <div class="rail" data-featured></div>
+
+    <div class="section-title"><h2 style="margin:0">Como funciona</h2></div>
+    <div class="steps">
+      <div class="panel"><h3>1. Entre</h3><p>Use sua conta Google. Só maiores de 18 anos podem entrar.</p></div>
+      <div class="panel"><h3>2. Escolha</h3><p>Filtre por categoria e encontre a live que combina com você.</p></div>
+      <div class="panel"><h3>3. Transmita</h3><p>Se for streamer, abra sua live com título e categoria.</p></div>
+    </div>
+
+    <div class="section-title"><h2 style="margin:0">Perguntas frequentes</h2></div>
+    <div class="faq">
+      <details>
+        <summary>O que é o pink.Live?</summary>
+        <p>É um protótipo de plataforma de lives, com espaço para criadores e espectadores. O nome é provisório.</p>
+      </details>
+      <details>
+        <summary>Quem pode entrar?</summary>
+        <p>Apenas maiores de 18 anos. A data de nascimento da conta é checada no login.</p>
+      </details>
+      <details>
+        <summary>Os vídeos são reais?</summary>
+        <p>Não. Neste protótipo, as lives e os perfis são de exemplo, sem transmissão de vídeo.</p>
+      </details>
+    </div>
+  </section>
+
+  <!-- Ao vivo -->
+  <section data-view="ao-vivo" hidden>
+    <div class="bar">
+      <h2 style="margin:0">Transmissões ao vivo</h2>
+      <div class="chips" role="group" aria-label="Filtrar por categoria" data-chips></div>
+    </div>
+    <div class="grid" data-grid></div>
+    <p class="empty" data-empty hidden>Nenhuma transmissão nesta categoria.</p>
+  </section>
+
+  <!-- Transmitir (só streamers logadas) -->
+  <section data-view="transmitir" hidden>
+    <div class="panel page">
+      <h2 style="margin:0">Transmitir</h2>
+      <p class="muted" data-stream-msg></p>
+      <div class="form" data-stream-form>
+        <div class="field">
+          <label for="s-titulo">Título da live</label>
+          <input id="s-titulo" maxlength="60" placeholder="Ex.: Tocando violão com o chat">
+        </div>
+        <div class="field">
+          <label for="s-cat">Categoria</label>
+          <select id="s-cat">
+            <option>Música</option><option>Games</option><option>Arte</option><option>Culinária</option><option>Papo</option>
+          </select>
+        </div>
+        <div><button class="btn" type="button" data-go-live>Iniciar live (simulação)</button></div>
+      </div>
+      <div class="notice" data-live-state hidden></div>
+    </div>
+  </section>
+
+  <!-- Entrar -->
+  <section data-view="entrar" hidden class="page">
+    <div class="panel page">
+      <h2 style="margin:0">Entrar com Google</h2>
+      <p class="muted">Espectadores e streamers usam a mesma conta Google. Antes de assistir, é preciso entrar.</p>
+      <div class="notice">Esta é uma simulação. Ela não acessa contas Google reais, e as contas são fictícias.</div>
+      <div><button class="btn" type="button" data-login-btn>Escolher conta (simulação)</button></div>
+      <p class="muted" style="margin:0" data-entrar-status></p>
+    </div>
+  </section>
+
+  <!-- Sobre -->
+  <section data-view="sobre" hidden class="page">
+    <h2>Sobre o pink.Live</h2>
+    <div class="panel">
+      <p>O pink.Live é uma plataforma de transmissões ao vivo pensada para criadores que querem conversar com o público de forma direta. O nome é provisório.</p>
+      <p>Este protótipo testa a navegação, o login com Google (simulado), os papéis de espectador e streamer e a verificação de idade. Não há vídeo real, pagamentos nem armazenamento de contas.</p>
+      <p style="margin:0">Um lançamento de verdade exigiria login Google com backend, verificação de idade por provedor especializado, moderação, denúncias, atendimento e conformidade com a LGPD.</p>
+    </div>
+    <div class="panel">
+      <p style="margin:0"><a href="#privacidade">Política de privacidade</a> · <a href="#termos">Termos de uso</a></p>
+    </div>
+  </section>
+
+  <!-- Privacidade -->
+  <section data-view="privacidade" hidden class="page">
+    <h2>Política de privacidade</h2>
+    <div class="panel">
+      <p><strong>Texto de exemplo.</strong> Deve ser revisado por um advogado antes de qualquer uso real.</p>
+      <p>Neste protótipo, o login é simulado. Nada do que você escolhe aqui é enviado para um servidor, e as contas são fictícias.</p>
+      <p>Em uma versão real, o login Google forneceria nome, e-mail e foto de perfil. A verificação de idade seria feita por um provedor específico, e você poderia pedir a exclusão da conta a qualquer momento.</p>
+    </div>
+  </section>
+
+  <!-- Termos -->
+  <section data-view="termos" hidden class="page">
+    <h2>Termos de uso</h2>
+    <div class="panel">
+      <p><strong>Texto de exemplo.</strong> Deve ser revisado por um advogado antes de qualquer uso real.</p>
+      <p>O uso da plataforma é permitido apenas para maiores de 18 anos. Conteúdo sexual explícito, ameaças, assédio, discurso de ódio e exploração de menores são proibidos e levam ao encerramento da conta.</p>
+      <p>O criador é responsável pelo conteúdo que transmite. A plataforma pode remover transmissões e suspender contas que descumpram estas regras.</p>
+    </div>
+  </section>
+
+  <footer>
+    <span class="logo" style="color:var(--fg)"><span class="logo-mark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7L8 5Z" fill="#fff"/></svg></span> pink.Live</span>
+    <nav aria-label="Rodapé">
+      <a href="#sobre">Sobre</a>
+      <a href="#privacidade">Privacidade</a>
+      <a href="#termos">Termos</a>
+    </nav>
+    <p style="margin:0">Protótipo com dados fictícios · nome provisório</p>
+  </footer>
+</main>
+
+<!-- Login simulado -->
+<dialog data-login-dlg>
+  <div class="dlg-head">
+    <h3 style="margin:0">Escolha uma conta</h3>
+    <button class="btn ghost small" type="button" data-close="login">Fechar</button>
+  </div>
+  <div class="dlg-body">
+    <p>Simulação de login com Google. As contas são fictícias.</p>
+    <div data-accounts style="display:grid;gap:10px"></div>
+    <p class="notice warn" data-login-err hidden></p>
+  </div>
+</dialog>
+
+<!-- Transmissão de exemplo -->
+<dialog data-dlg>
+  <div class="dlg-stage" data-dlg-stage></div>
+  <div class="dlg-body">
+    <div class="dlg-foot">
+      <h3 style="margin:0" data-dlg-title></h3>
+      <span class="badge"><span class="dot" aria-hidden="true"></span> Ao vivo</span>
+    </div>
+    <p data-dlg-desc></p>
+    <p class="notice">Transmissão de exemplo. Este protótipo não reproduz vídeo.</p>
+    <div class="dlg-foot">
+      <span class="muted" style="font-size:.9rem" data-dlg-views></span>
+      <button class="btn ghost small" type="button" data-close="dlg">Fechar</button>
+    </div>
+  </div>
+</dialog>
+
+<script>
+(function () {
+  // Contas fictícias do login simulado. A idade vem da data de nascimento de cada conta.
+  var ACCOUNTS = [
+    { id: "a1", name: "Bia Teste", email: "bia.teste@exemplo.com", role: "viewer", nasc: "2000-05-14", hue: "#ff2d87" },
+    { id: "a2", name: "Luna Teste", email: "luna.teste@exemplo.com", role: "streamer", nasc: "1996-09-02", hue: "#7b2ff7" },
+    { id: "a3", name: "Caio Teste", email: "caio.teste@exemplo.com", role: "viewer", nasc: "2012-03-20", hue: "#2a9d8f" }
+  ];
+
+  var STREAMS = [
+    { id: 1, name: "Luna Prado", cat: "Música", title: "Cantando pedidos da galera", views: 214, hue: "#ff2d87", desc: "Sessão de violão com pedidos do chat. Exemplo." },
+    { id: 2, name: "Rafa Torres", cat: "Games", title: "Ranqueada até o fim da noite", views: 532, hue: "#7b2ff7", desc: "Partidas ranqueadas com comentários ao vivo. Exemplo." },
+    { id: 3, name: "Bia Amorim", cat: "Arte", title: "Pintando uma paisagem em aquarela", views: 87, hue: "#e8703a", desc: "Passo a passo de uma aquarela, com perguntas do público. Exemplo." },
+    { id: 4, name: "Tiago Nunes", cat: "Culinária", title: "Risoto de cogumelos ao vivo", views: 301, hue: "#2a9d8f", desc: "Receita simples, com dicas de tempero. Exemplo." },
+    { id: 5, name: "Ana Clara", cat: "Papo", title: "Conversa aberta sobre carreira", views: 149, hue: "#4361ee", desc: "Bate-papo com o público sobre começar uma carreira criativa. Exemplo." },
+    { id: 6, name: "Lucas Mendes", cat: "Música", title: "Beatmaking do zero", views: 66, hue: "#c9184a", desc: "Criação de uma batida do início ao fim. Exemplo." },
+    { id: 7, name: "Mari Costa", cat: "Games", title: "Speedrun de um clássico", views: 418, hue: "#3a86ff", desc: "Tentativas de recorde com análise do público. Exemplo." },
+    { id: 8, name: "Caio Ribeiro", cat: "Papo", title: "Perguntas e respostas da semana", views: 118, hue: "#8338ec", desc: "Respondendo perguntas enviadas pelo chat. Exemplo." }
+  ];
+  var CATS = ["Todas"].concat(Array.from(new Set(STREAMS.map(function (s) { return s.cat; }))));
+  var currentCat = "Todas";
+  var session = null;   // { id, name, role, hue } ou null. Só em memória.
+  var myLive = null;    // live simulada da streamer logada
+
+  function $(sel, root) { return (root || document).querySelector(sel); }
+  function $all(sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); }
+  function initials(name) { return name.split(" ").map(function (p) { return p[0]; }).join("").slice(0, 2); }
+  function ageOf(dateStr) {
+    var d = new Date(dateStr + "T00:00:00"); var now = new Date();
+    var age = now.getFullYear() - d.getFullYear();
+    var m = now.getMonth() - d.getMonth();
+    if (m < 0 || (m === 0 && now.getDate() < d.getDate())) age--;
+    return age;
+  }
+  function openDlg(d) { if (typeof d.showModal === "function") d.showModal(); else d.setAttribute("open", ""); }
+  function closeDlg(d) { if (typeof d.close === "function") d.close(); else d.removeAttribute("open"); }
+
+  function card(s) {
+    var b = document.createElement("button");
+    b.type = "button";
+    b.className = "card";
+    b.setAttribute("aria-label", "Abrir transmissão de " + s.name);
+    b.innerHTML =
+      '<div class="thumb" style="background:linear-gradient(160deg,' + s.hue + ',#1a1228)">' +
+        '<span aria-hidden="true">' + initials(s.name) + '</span>' +
+        '<span class="live-tag">AO VIVO</span>' +
+        '<span class="views"><span></span><span></span></span>' +
+      '</div>' +
+      '<div class="meta"><strong></strong><small></small><small></small></div>';
+    $("strong", b).textContent = s.title;
+    var smalls = $all("small", b);
+    smalls[0].textContent = s.name;
+    smalls[1].textContent = s.cat;
+    var v = $all(".views span", b);
+    v[0].textContent = s.name.split(" ")[0];
+    v[1].textContent = s.views + " assistindo";
+    b.addEventListener("click", function () { openStream(s); });
+    return b;
+  }
+
+  // Assistir exige login. Sem sessão, mostra o convite para entrar.
+  function openStream(s) {
+    var d = $("[data-dlg]");
+    if (!session) {
+      $("[data-dlg-stage]").style.background = "linear-gradient(160deg,#3a2a50,#1a1228)";
+      $("[data-dlg-stage]").textContent = "";
+      $("[data-dlg-title]").textContent = "Entre para assistir";
+      $("[data-dlg-desc]").textContent = "Assistir transmissões exige uma conta Google, com 18 anos ou mais.";
+      $("[data-dlg-views]").textContent = "";
+      openDlg(d);
+      return;
+    }
+    $("[data-dlg-stage]").style.background = "linear-gradient(160deg," + s.hue + ",#1a1228)";
+    $("[data-dlg-stage]").textContent = initials(s.name);
+    $("[data-dlg-title]").textContent = s.title;
+    $("[data-dlg-desc]").textContent = s.name + " · " + s.cat + ". " + s.desc;
+    $("[data-dlg-views]").textContent = s.views + " pessoas assistindo";
+    openDlg(d);
+  }
+
+  function renderChips() {
+    var box = $("[data-chips]");
+    box.innerHTML = "";
+    CATS.forEach(function (c) {
+      var b = document.createElement("button");
+      b.type = "button"; b.className = "chip"; b.textContent = c;
+      b.setAttribute("aria-pressed", String(c === currentCat));
+      b.addEventListener("click", function () { currentCat = c; renderChips(); renderGrid(); });
+      box.appendChild(b);
+    });
+  }
+
+  function allStreams() {
+    return myLive ? [myLive].concat(STREAMS) : STREAMS;
+  }
+
+  function renderGrid() {
+    var grid = $("[data-grid]");
+    grid.innerHTML = "";
+    var list = allStreams().filter(function (s) { return currentCat === "Todas" || s.cat === currentCat; });
+    list.forEach(function (s) { grid.appendChild(card(s)); });
+    $("[data-empty]").hidden = list.length > 0;
+  }
+
+  function renderFeatured() {
+    var box = $("[data-featured]");
+    box.innerHTML = "";
+    STREAMS.slice().sort(function (a, b) { return b.views - a.views; }).slice(0, 6).forEach(function (s) { box.appendChild(card(s)); });
+  }
+
+  function renderAccounts() {
+    var box = $("[data-accounts]");
+    box.innerHTML = "";
+    ACCOUNTS.forEach(function (acc) {
+      var b = document.createElement("button");
+      b.type = "button"; b.className = "account";
+      var roleLabel = acc.role === "streamer" ? "Streamer" : "Espectadora";
+      b.innerHTML = '<span class="avatar" style="background:' + acc.hue + '" aria-hidden="true"></span><span><strong></strong><small></small></span>';
+      $("strong", b).textContent = acc.name;
+      $("small", b).textContent = roleLabel + " · " + acc.email;
+      b.addEventListener("click", function () { login(acc); });
+      box.appendChild(b);
+    });
+  }
+
+  // Login simulado: bloqueia quem tem menos de 18 anos.
+  function login(acc) {
+    var err = $("[data-login-err]");
+    if (ageOf(acc.nasc) < 18) {
+      err.hidden = false;
+      err.textContent = "Esta conta tem menos de 18 anos, então não pode entrar no pink.Live.";
+      return;
+    }
+    err.hidden = true;
+    session = { id: acc.id, name: acc.name, role: acc.role, hue: acc.hue };
+    closeDlg($("[data-login-dlg]"));
+    renderHeader();
+    $("[data-entrar-status]").textContent = "Entrou como " + acc.name + " (" + (acc.role === "streamer" ? "streamer" : "espectadora") + ").";
+    location.hash = acc.role === "streamer" ? "#transmitir" : "#ao-vivo";
+  }
+
+  function logout() {
+    session = null;
+    myLive = null;
+    renderHeader();
+    renderGrid();
+    location.hash = "#inicio";
+  }
+
+  function renderHeader() {
+    var who = $("[data-who]");
+    var btn = $all("[data-login-btn]");
+    var streamerLink = $('[data-only="streamer"]');
+    if (session) {
+      who.innerHTML = '<span class="avatar" style="background:' + session.hue + '" aria-hidden="true"></span><span class="wname"></span><button class="btn ghost small" type="button" data-logout>Sair</button>';
+      $(".wname", who).textContent = session.name;
+      $("[data-logout]", who).addEventListener("click", logout);
+      btn.forEach(function (b) { b.hidden = true; });
+    } else {
+      who.innerHTML = "";
+      btn.forEach(function (b) { b.hidden = false; });
+    }
+    streamerLink.hidden = !(session && session.role === "streamer");
+    renderStreamGate();
+  }
+
+  // Tela de transmitir: só streamers logadas veem o formulário.
+  function renderStreamGate() {
+    var form = $("[data-stream-form]");
+    var msg = $("[data-stream-msg]");
+    var state = $("[data-live-state]");
+    if (!session) {
+      msg.textContent = "Entre com uma conta de streamer para transmitir.";
+      form.hidden = true; state.hidden = true; return;
+    }
+    if (session.role !== "streamer") {
+      msg.textContent = "Esta conta é de espectadora. Para transmitir, entre com uma conta de streamer.";
+      form.hidden = true; state.hidden = true; return;
+    }
+    msg.textContent = "Você está logada como " + session.name + ".";
+    form.hidden = !!myLive;
+    state.hidden = !myLive;
+    if (myLive) state.textContent = "Você está ao vivo (simulação): " + myLive.title + ". Esta live aparece na lista como exemplo.";
+  }
+
+  function bindStream() {
+    $("[data-go-live]").addEventListener("click", function () {
+      var titulo = $("#s-titulo").value.trim() || "Live sem título";
+      var cat = $("#s-cat").value;
+      myLive = { id: 0, name: session.name, cat: cat, title: titulo, views: 0, hue: session.hue, desc: "Sua live de exemplo. Este protótipo não transmite vídeo." };
+      renderGrid();
+      renderStreamGate();
+    });
+  }
+
+  var VIEWS = ["inicio", "ao-vivo", "transmitir", "entrar", "sobre", "privacidade", "termos"];
+  function route() {
+    var h = (location.hash || "#inicio").slice(1);
+    if (VIEWS.indexOf(h) === -1) h = "inicio";
+    if (h === "transmitir" && (!session || session.role !== "streamer")) h = "entrar";
+    $all("[data-view]").forEach(function (sec) { sec.hidden = sec.getAttribute("data-view") !== h; });
+    $all("[data-route]").forEach(function (a) {
+      if (a.getAttribute("data-route") === h) a.setAttribute("aria-current", "page");
+      else a.removeAttribute("aria-current");
+    });
+    window.scrollTo(0, 0);
+  }
+
+  function boot() {
+    renderChips();
+    renderGrid();
+    renderFeatured();
+    renderAccounts();
+    bindStream();
+    $all("[data-login-btn]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        $("[data-login-err]").hidden = true;
+        openDlg($("[data-login-dlg]"));
+      });
+    });
+    $all("[data-close]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        closeDlg(b.getAttribute("data-close") === "login" ? $("[data-login-dlg]") : $("[data-dlg]"));
+      });
+    });
+    renderHeader();
+    window.addEventListener("hashchange", route);
+    route();
+  }
+
+  if (document.readyState === "loading") { document.addEventListener("DOMContentLoaded", boot); } else { boot(); }
+})();
+</script>
